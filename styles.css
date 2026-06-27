@@ -59,6 +59,18 @@ a:hover {
     "Segoe UI", sans-serif;
 }
 
+.thoughts-page .site-header {
+  margin-bottom: 64px;
+}
+
+.home-page .site-header {
+  margin-bottom: 64px;
+}
+
+.post-page .site-header {
+  margin-bottom: 64px;
+}
+
 .name {
   color: var(--text);
   text-decoration: none;
@@ -116,8 +128,30 @@ h2 {
   font-size: 22px;
 }
 
+.currently h2 {
+  font-size: 30px;
+}
+
 p {
   margin: 0 0 22px;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", monospace;
+  font-size: 0.88em;
+  color: inherit;
+  white-space: nowrap;
+}
+
+h1 code,
+.thought-list code {
+  font-size: 0.78em;
+}
+
+.thought-list code {
+  padding-top: 0.06em;
+  padding-bottom: 0.06em;
 }
 
 .section {

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>I HATE .first AND .second</title>
+    <meta
+      name="description"
+      content="A note from Sid about .first and .second."
+    >
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body>
+    <main class="page post-page">
+      <header class="site-header">
+        <a class="name" href="../">siddharth kotapati</a>
+        <nav aria-label="Primary">
+          <a href="./">thoughts</a>
+        </nav>
+      </header>
+
+      <article class="post">
+        <h1>I HATE <code>.first</code> AND <code>.second</code></h1>
+        <time datetime="2026-06-26">June 26, 2026</time>
+
+        <p>
+          specifically i mean the C++ syntax around <code>std::pair</code> and
+          even <code>-&gt;first</code> and <code>-&gt;second</code> with
+          <code>std::map</code> / <code>std::unordered_map</code> iterators.
+        </p>
+
+        <p>
+          seriously, who the hell thought that this was okay. i get it, if
+          you're in an interview and times are tough - totally understand, <a href="https://fortune.com/2026/03/21/entry-level-jobs-gen-z-not-their-fault/">dire times n all.</a> BUT WHY DOES CLAUDE DEFAULT TO IT! IT'S TECHNICAL
+          DEBT!!!
+        </p>
+
+        <p>
+          anyway if you're interested the significantly better way to deal with
+          these is to define your own structs, or use
+          <a href="https://www.youtube.com/watch?v=AIKAOWs213o&t=0s"
+            >structured bindings</a
+          >. dereferencing an iterator after you check it against
+          <code>.end()</code> is often useful.
+        </p>
+
+        <p>
+          but seriously, anyone who thinks this is okay to use in production
+          code deserves the
+          <a href="https://en.wikipedia.org/wiki/Brazen_bull">brazen bull</a>.
+          i don't actually think people who use that syntax deserve the brazen
+          bull, but i think it provides imagery that is comparable to the
+          feelings i get when i see this code.
+        </p>
+
+        <p>
+          once i had an interview where they gave me starter code and then,
+          instead of using structured bindings in the range-based for loop, they
+          used an iterator with <code>-&gt;first</code> and
+          <code>-&gt;second</code>. There were like 5 similar functions that
+          operated on similarly named
+          <code>unordered_maps</code>. i'm sure the interviewer was scrolling
+          Slack meme channels while i fumbled and bumbled around for 50 minutes.
+          i would name the company but i'm actually hoping that they give me an
+          interview at some point... i'll wait until after this recruiting
+          cycle.
+        </p>
+
+        <p>
+          but yeah this makes me so mad. this is a completely solved problem,
+          there's no reason to be doing this.
+        </p>
+      </article>
+
+      <p class="back-link"><a href="./">back to thoughts</a></p>
+    </main>
+  </body>
+</html>
