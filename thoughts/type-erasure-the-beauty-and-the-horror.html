@@ -42,22 +42,20 @@
         </p>
 
         <p>
-          so basically this what type erasure gives you: if you have some type
-          erased object. the type erased class defines what the interface of that
-          object is. the common example (and the one we will use) is a type
+          basically this is what type erasure gives you: if you have a type erased class whose interface is a subset of some other object's interface, then you can wrap that object with your type erased class. by doing this, you change the object's type to something uniform, this is convenient because you can make objects that were previously different types "of the same type", as long as they both share the common interface. yeah i know it's still confusing
+        </p>
+          
+        <p>
+          the common example (and the one we will use) is a type
           erased wrapper for a callable object (ever heard of
-          <code>std::function</code> ?). every non-empty
-          <code>std::function</code> object has the ability to be called like a
+          <code>std::function</code> !). `std::function` is the standard library's implementation of a callable function object. it is also implemented with type erasure. every non-empty <code>std::function</code> object has the ability to be called like a
           function because it has a call operator (<code>operator()</code>)
           overloaded. that's why you can assign function pointers, lambdas,
           functors, or other <code>std::function</code> objects into that type
-          erased class. now what does that abstraction give you? well there's a
+          erased class. now you may be wondering why this might be useful? well there's a
           couple benefits which i will discuss later, but for now i will leave
           you with this. say you wanted to create a generic container for
-          arbitrary functions (ever head of a task queue?), the only other ways
-          i'm aware of doing this is one with type erasure, and two writing a
-          inheritance hierarchy and creating a container of base class pointers
-          (yuck!).
+          lambda functions (sounds like a task queue to me!), there isn't really a great way to accomplish this without type erasure. the primary reason being that a lambda's type is both unique and unknown until compile time (when the compiler creates it). 
         </p>
 
         <p>
@@ -72,7 +70,7 @@
           after all...). it's not that the object doesn't have a type, it's that
           the object's type is hidden behind the implementation of a type erased
           wrapper class. the new object now becomes something of type "type
-          erased wrapper class".
+          erased wrapper class". in practice, the original object can either be in a valid but unspecified state (if it was moved into the type erased class), or if it was copied in, then the original object stays in the state it started in.
         </p>
 
         <p>
