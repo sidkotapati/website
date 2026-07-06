@@ -47,8 +47,8 @@
           
         <p>
           the common example (and the one we will use) is a type
-          erased wrapper for a callable object (ever heard of
-          <code>std::function</code> !). `std::function` is the standard library's implementation of a callable function object. it is also implemented with type erasure. every non-empty <code>std::function</code> object has the ability to be called like a
+          erased wrapper for a callable object: <code>std::function</code>.
+          <code>std::function</code> is the standard library's implementation of a callable function object. it is also implemented with type erasure. every non-empty <code>std::function</code> object has the ability to be called like a
           function because it has a call operator (<code>operator()</code>)
           overloaded. that's why you can assign function pointers, lambdas,
           functors, or other <code>std::function</code> objects into that type
