@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>type erasure: the beauty and the horror</title>
+    <meta
+      name="description"
+      content="A note from Sid about type erasure in C++."
+    >
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body>
+    <main class="page post-page">
+      <header class="site-header">
+        <a class="name" href="../">siddharth kotapati</a>
+        <nav aria-label="Primary">
+          <a href="./">thoughts</a>
+        </nav>
+      </header>
+
+      <article class="post">
+        <h1>type erasure: the beauty and the horror</h1>
+        <time datetime="2026-07-05">July 5, 2026</time>
+
+        <p>
+          <a href="https://www.youtube.com/watch?v=uK2eFv7ne_Q"
+            >right now only i don't understand type erasure. by the end of this
+            article hopefully both of us will not understand type erasure
+            together.</a
+          >
+        </p>
+
+        <p>
+          i think Fedor Pikus described it along the following lines in his
+          <a
+            href="https://www.packtpub.com/en-us/product/hands-on-design-patterns-with-c-9781788832564"
+            >Design Patterns book</a
+          >: type erasure is a technique that can be used to separate an
+          interface from an implementation. yeah i wasn't really sure what that
+          meant when i read it either.
+        </p>
+
+        <p>
+          so basically this what type erasure gives you: if you have some type
+          erased object. the type erased class defines what the interface of that
+          object is. the common example (and the one we will use) is a type
+          erased wrapper for a callable object (ever heard of
+          <code>std::function</code> ?). every non-empty
+          <code>std::function</code> object has the ability to be called like a
+          function because it has a call operator (<code>operator()</code>)
+          overloaded. that's why you can assign function pointers, lambdas,
+          functors, or other <code>std::function</code> objects into that type
+          erased class. now what does that abstraction give you? well there's a
+          couple benefits which i will discuss later, but for now i will leave
+          you with this. say you wanted to create a generic container for
+          arbitrary functions (ever head of a task queue?), the only other ways
+          i'm aware of doing this is one with type erasure, and two writing a
+          inheritance hierarchy and creating a container of base class pointers
+          (yuck!).
+        </p>
+
+        <p>
+          basically type erasure is a technique to achieve
+          <a href="https://www.geeksforgeeks.org/cpp/cpp-polymorphism/"
+            >runtime polymorphism</a
+          >. the name is kinda misleading too, type erasure doesn't mean that the
+          object loses it's type... everything in C++ needs a type (it is a
+          <a href="https://en.wikipedia.org/wiki/Type_safety"
+            >statically typed language</a
+          >
+          after all...). it's not that the object doesn't have a type, it's that
+          the object's type is hidden behind the implementation of a type erased
+          wrapper class. the new object now becomes something of type "type
+          erased wrapper class".
+        </p>
+
+        <p>
+          the last thing i want to mention before i show some code is that, once
+          the type becomes "erased" (hidden by the type erased wrapper), you
+          can't access its facilities that the type erased wrapper doesn't
+          support. if your functor has some other functionality, let's say an
+          accessor method that tracks how many times the functor has been called
+          -- you won't be able to use that facility once the type is erased by
+          <code>std::function</code> (you could via
+          <code>.target&lt;T&gt;()</code> but i'm just gonna pretend that's not there).
+          <code>std::any</code> is another place where type erasure is used, and
+          you actually can get the original type back via
+          <code>std::any_cast</code>, but if you were going to cast it back to the
+          original type you probably want to think about deeply about why
+          you're erasing it in the first place. for context, any time i thought
+          i could use <code>std::any</code> i always immediately realize it
+          doesn't make sense for that situation. but that's my own opinionated
+          take.
+        </p>
+
+        <p>
+          okay now that you have some context on what type erasure is and what
+          it can be used for, let's take a look a simplified example:
+        </p>
+
+        <pre><code>// Assume required headers are included.
+
+class CallableObject {
+private:
+  class Base {
+  public:
+    virtual ~Base() = default;
+    virtual void invoke() = 0;
+  };
+
+  template&lt;typename Func&gt;
+  class Model final : public Base {
+  public:
+    Model(Func func) : callable_(std::move(func)) {}
+
+    void invoke() override { callable_(); }
+
+  private:
+    Func callable_;
+  };
+
+  std::unique_ptr&lt;Base&gt; impl_;
+
+public:
+  CallableObject() = delete;
+
+  template&lt;typename Func&gt;
+  CallableObject(Func func) : impl_{std::make_unique&lt;Model&lt;Func&gt;&gt;(std::move(func))} {}
+
+  void operator()() {
+    impl_-&gt;invoke();
+  }
+};</code></pre>
+
+        <p>
+          this is like the most toy model of toy models i can create. i don't
+          want to explain value categories or anything like that so i'm gonna
+          say that this type erased implementation only supports construction
+          via a callable.
+        </p>
+
+        <p>
+          okay let me take a stab at explaining this. basically we have a
+          <code>std::unique_ptr</code> to a base class. this should make sense
+          since we want to take advantage of
+          <a
+            href="https://medium.com/@ahmedibrahimwahdan/dynamic-dispatch-in-c-understanding-runtime-polymorphism-behind-the-scene-58afb59c3ec7"
+            >dynamic dispatch</a
+          >. whenever the call operator is used at some call site, the
+          <code>CallableObject</code> runs <code>impl-&gt;invoke()</code> which
+          runs the specific <code>invoke</code> implementation that the dynamic
+          type of the object <code>impl_</code> points to defines. the dynamic
+          type is always going to be some <code>Model&lt;Func&gt;</code> object
+          type, where the <code>Func</code> should have its call operator
+          overloaded (an improved implementation could use
+          <a href="https://www.cppstories.com/2021/concepts-intro/"
+            >concepts</a
+          >
+          to enforce this at compile time).
+        </p>
+
+        <p>
+          Okay let's now talk about how we got the
+          <code>Model&lt;Func&gt;</code> object to go inside the the
+          <code>impl_</code> pointer. obviously <code>std::make_unique</code>
+          is used for creating a <code>unique_ptr</code>, the pointer is of type
+          <code>Model&lt;Func&gt;</code> where <code>Func</code> is the type of
+          the original callable (the type we are erasing). that object (and
+          type) is what's stored (or more accurately hidden) in the
+          <code>Model&lt;Func&gt;</code> object we are creating.
+        </p>
+
+        <p>
+          We define our <code>Base</code> class as an
+          <a href="https://en.cppreference.com/w/cpp/language/abstract_class"
+            >abstract class</a
+          >, that defines an <code>invoke()</code> method that
+          <code>Model&lt;Func&gt;</code> must implement.
+          <code>Model&lt;Func&gt;</code> implements it by simply relying on the
+          <code>Func</code> objects <code>operator()</code> implementation.
+        </p>
+
+        <p>
+          If you're still confused, I would trace through the code, maybe throw
+          a simple example instantiation in
+          <a href="https://cppinsights.io/">cppinsights.io</a>, and see what
+          template code it generates.
+        </p>
+
+        <p>
+          i'm going to mention something really quickly, and if you don't
+          understand it then just forget about it. if you want to learn more
+          Feder Pikus's
+          <a
+            href="https://www.packtpub.com/en-us/product/hands-on-design-patterns-with-c-9781788832564"
+            >Hands On Design Patterns book</a
+          >
+          also has a section on it. Okay so basically if you haven't noticed
+          this type erasure stuff requires a heap allocation (in my
+          implementation). and while that can be okay (and is robust), there are
+          plenty of safety and / or performance critical use cases in C++ where
+          this is not desired. Here I'm going to mention you can kind of
+          implement the vtables yourself with small-buffer optimization and
+          inline storage (maybe you've heard of small-string optimization as
+          well -- similar concept). this can help you avoid heap allocations.
+          i've seen code bases where they statically enforce that
+          <code>std::function</code> objects are within a certain size limit so
+          they never allocate. a fun little tidbit of info!
+        </p>
+
+        <h2>some meta commentary</h2>
+
+        <p>
+          this technique is mostly used in places where you want polymorphic
+          behavior that doesn't inherit from a common base class, while also
+          being able to use it with an infinite number of types. you can imagine
+          that a lambda that you might write, whose type is opaque until compile
+          time, wouldn't really be able to inherit from a base class (honestly i
+          wouldn't be surprised if it could these days,
+          <a href="https://leanpub.com/cpplambda"
+            >lambdas have been worked on extensively in each new standard
+            edition</a
+          >).
+        </p>
+
+        <p>
+          going back to the container example from before the other technique
+          you could use (other than inheritance discussed above) is using
+          <code>std::variant</code>, which has a lot of benefits (chiefly --
+          <a
+            href="https://www.youtube.com/watch?v=G9MxNwUoSt0&t=2259s&pp=ygUPdmFsdWUgc2VtYW50aWNz"
+            >value semantics</a
+          >) but the types have to be known
+          <strong>and more importantly compiled</strong> together. Therefore
+          <code>std::variant</code> must be used with a closed set of types.
+          type erasure is more generic -- as long as the type fulfills the
+          defined interface, you can larp as the type erased class.
+        </p>
+
+        <p>
+          with the edition of concepts you can write really nice type erased
+          classes, since concepts allow you to enforce compile time properties
+          on your template type. so while duck-typing with concepts is its own
+          version of polymorphism, it can also be used very fruitfully in type
+          erased implementations.
+        </p>
+
+        <p>
+          alrighty one last thing, i want to mention a couple of places in the
+          standard library where type erasure is used, so you'll actually
+          believe me when I tell you this is useful. i've mentioned
+          <code>std::function</code> and i've also mentioned
+          <code>std::any</code>, but did you know that
+          <code>std::shared_ptr</code> allows a callable deleter to be
+          passed into the smart pointer at construction? it's very elegant
+          because it doesn't add to the smart pointers type information (the
+          deleter object is just stored in the <code>std::shared_ptr</code>'s
+          control block), but also provides a very high value feature. you can
+          imagine that on destruction of some object you may not only want to
+          deallocate / destruct the object but maybe you also want to close a
+          file descriptor that was associated with the object. maybe you want to
+          <code>unmap()</code> a shared memory arena when all
+          <code>std::shared_ptr</code> references to it die. type erasure to the
+          rescue! this is different from
+          <code>std::unique_ptr</code>, where the deleter <em>is</em> part of
+          the type, because it's required for knowing the
+          <code>unique_ptr</code>'s size. with
+          <code>std::shared_ptr</code>, the deleter is stored in the control
+          block, so the deleter type doesn't appear in the smart pointer's type.
+        </p>
+
+        <p>
+          anyway that's a little bit about type erasure.
+        </p>
+
+        <p>
+          if all the forms of polymorphism in C++ where avengers i bet type
+          erasure would be ironman. or maybe spider man.
+        </p>
+
+        <p>
+          my question to you is if all the polymorphism techniques in C++ were
+          members of the justice league then who would be batman? food for
+          thought...
+        </p>
+      </article>
+
+      <p class="back-link"><a href="./">back to thoughts</a></p>
+    </main>
+  </body>
+</html>

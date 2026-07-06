@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>maiximizing AI effectiveness from first principles</title>
+    <meta
+      name="description"
+      content="A note from Sid about AI effectiveness from first principles."
+    >
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body>
+    <main class="page post-page">
+      <header class="site-header">
+        <a class="name" href="../">siddharth kotapati</a>
+        <nav aria-label="Primary">
+          <a href="./">thoughts</a>
+        </nav>
+      </header>
+
+      <article class="post">
+        <h1>maiximizing AI effectiveness from first principles</h1>
+        <time datetime="2026-06-27">June 27, 2026</time>
+
+        <p>
+          this will probably be an active doc for sometime. 
+        </p>
+
+        <p>
+          basically this going to my thoughts / findings on how to best use AI, in the context of a new grad who likes coding but also doesn't want to become obselete.
+        </p>
+
+
+        <p>
+          i think something that will be useful here, is to determine -- what do we want the ultimate output of our AI use to be?
+        </p>
+
+        <p>
+          a fair, but shortsighted, answer is that we want code (or direct results in whatever knowledge field analog you work in). specifically code that we can merge. [for me] what comes with that is that we want to understand the code that we've produced:
+        </p>
+
+        <ul>
+          <li>
+            at a minimum we should be able to understand how our code transforms inputs to outputs, how we modify the state of the system (if it's stateful), and any state we've added to the system
+          </li>
+          <li>
+            a more sophisticated version of this is having a deep understanding of the engineering decisions being made. in C++ land that could be "why did we use this kind of polymorphism as opposed to another technique" or "how will this affect future extensibility of this subsystem"
+          </li>
+          <li>
+            this might sound overboard but i think it's fair for any PR you've put up, you should be able to stand in a conference room with the engineers who are reviewing your code (ideally they would be better engineers than you), and answer any question that they might have on how the code works and why we've made the decisions we did.
+          </li>
+        </ul>
+
+        <p>
+          but zooming out, what's important at this stage of our <sup><a href="#career-note">*</a></sup> career is that the work we do is helping us accummulate skills / expertise. notice how i didn't necessarily say that it needs to be valuable in the future. interestingly enough, i would push back that we should care if the things we are learning right now will become directly valuable. 
+        </p>
+        <p>
+          learning something new is in-and-of-itself (is that the correct expression?) inherently valuable. even if you're an ml engineer, and you do an internship working on cyber security that is still useful. in this case it is not smart to say that, in the future i am going to be an ml engineer so it doesn't matter if i understand how the core of this technology works (therefore green lighting clauding a bunch of stuff). having a broad understanding of different things and how they tie in together and connect helps you make connections between different fields / systems (or different bending elements if i was <a href="https://www.youtube.com/watch?v=cNBgrMNmOJk">uncle iroh teaching you how to redirect lightning</a>).
+        </p>
+
+        <p>
+          that brings us to the second important point here. think bigger. what i mean by that is that we should think on longer time horizons than simply "pushing the next PR" or even getting the return offer at your internship.
+        </p>
+        
+        <p>
+          it is very obvious that if you use this wrong over the 10 years of our careers, that you will not be able code very well when we come out on the other side.
+        </p>
+
+        <p>
+          that basically takes us to what i think is the best approach to thinking about AI. there are 4 ways that you should use AI:
+        </p>
+
+        <ul>
+          <li>
+            you write, ai reads
+          </li>
+          <li>
+            ai writes, you read
+          </li>
+          <li>
+            ai writes, you skim and intentionally accept that this isn't something you care about and move on
+          </li>
+          <li>
+            you don't. hand code everything like they did in the
+            <a href="https://en.wikipedia.org/wiki/Cretaceous">Cretaceous period</a>
+          </li>
+        </ul>
+
+        <p>
+          any reasonable person can make an argument for all of these options in specific situations. i myself have done all of these at various points in my (albeit short) career thus far. but i think the policy that works from principles outlined above is -- "you write, ai reads" or "hand code" (like the original fire benders! there's no way i can find a clip of this scene, just watch the show).
+        </p>
+
+        <p>
+          today i tried something that one of my intern friends showed. he had wired up claude with github cli in such a way where he could have claude autonomously respond to reviewers comments on his PRs.
+        </p>
+
+        <p>
+          at first i thought: "dude you might be the claude-rotted person i know"
+        </p>
+
+        <p>
+          but then i thought about it. what if claude could take a look at reviewer comments, compose fixes for each comment, put them in your git stash (commits would be longer churn for reviewing, fixing, and squashing) and then you could pop each stash off, make your fixes, and then stage it. rinse and repeat until all of the stashed comments are done.
+        </p>
+
+        <p>
+          the issue was that not all comments needed code changes, some just existed for awareness. and some comments needed changes in more than one place. many comments are quicker to go fix myself. nits for example are much easier to just fire off yourself. hence it became clear that it's much easier to dynamically decide whether you should be responding to a comment based on your own judgement than let claude guess. experiment failed.
+        </p>
+
+        <aside class="footnotes" aria-label="Footnotes">
+          <p id="career-note">
+            * i say "our" but i mean "my", but in my mind saying "our" sounds less selfish? or maybe pretentious? idk.
+        </p>
+      </article>
+
+      <p class="back-link"><a href="./">back to thoughts</a></p>
+    </main>
+  </body>
+</html>
